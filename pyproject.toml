@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cloudtxn"
-version = "0.9.1"
+version = "0.9.2"
 description = "AI-compiled incident transactions with live production telemetry"
 readme = "README.md"
 requires-python = ">=3.9"
