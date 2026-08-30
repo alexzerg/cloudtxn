@@ -4,4 +4,4 @@ spec:
   paymentApiReplicas: 1
   paymentProvider: primary
   paymentFallback: false
-  paymentReconcilerReplicas: 1
+  paymentReconcilerReplicas: 0
