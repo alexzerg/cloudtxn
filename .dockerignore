@@ -1,0 +1,13 @@
+.git
+.github
+.sandbox
+.venv
+__pycache__
+.pytest_cache
+.cloudtxn
+dist
+build
+*.egg-info
+openspec
+bruno
+tests

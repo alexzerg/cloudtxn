@@ -1,0 +1,3 @@
+# Intentionally inert. Use `make demo-up`, which loads sandbox/compose.yaml
+# with the isolated `cloudtxn-sandbox` project name.
+services: {}

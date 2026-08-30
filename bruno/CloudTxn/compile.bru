@@ -1,0 +1,25 @@
+meta {
+  name: Compile Runbook With Local AI
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://127.0.0.1:18000/api/compile
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "prompt": "Scale the cloudtxn-demo deployment to 3 replicas, set /cloudtxn/demo to after, then simulate a failure so the transaction rolls back."
+  }
+}
+
+tests {
+  test("AI returns an unexecuted typed plan", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body.executed).to.equal(false);
+    expect(res.body.transaction.apiVersion).to.equal("cloudtxn.io/v1");
+  });
+}

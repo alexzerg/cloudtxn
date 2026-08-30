@@ -1,0 +1,49 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: cloudtxn-web
+    url: http://web:8787
+    connect_timeout: 10000
+    read_timeout: 180000
+    write_timeout: 180000
+    routes:
+      - name: cloudtxn-web
+        paths:
+          - /
+        strip_path: false
+
+  - name: payment-control
+    url: http://demo-control:8790
+    connect_timeout: 5000
+    read_timeout: 15000
+    write_timeout: 15000
+    routes:
+      - name: payment-control
+        paths:
+          - /payments/flags
+          - /payments/reset
+        strip_path: false
+
+  - name: payment-lab
+    url: http://k3d-cloudtxn-sandbox-demo-server-0:30080
+    connect_timeout: 5000
+    read_timeout: 15000
+    write_timeout: 15000
+    routes:
+      - name: payment-lab
+        paths:
+          - /lab
+          - /customer
+        strip_path: false
+
+plugins:
+  - name: correlation-id
+    config:
+      header_name: X-CloudTxn-Request-ID
+      generator: uuid
+      echo_downstream: true
+  - name: rate-limiting
+    config:
+      minute: 60
+      policy: local

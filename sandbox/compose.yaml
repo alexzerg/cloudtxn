@@ -1,0 +1,84 @@
+services:
+  localstack:
+    image: localstack/localstack:4.8.1
+    environment:
+      SERVICES: ssm
+      DEBUG: "0"
+    ports:
+      - "127.0.0.1:14566:4566"
+
+  ollama:
+    image: ollama/ollama:0.11.4
+    volumes:
+      - ../.sandbox/ollama:/root/.ollama
+    ports:
+      - "127.0.0.1:11434:11434"
+
+  demo-control:
+    build:
+      context: ..
+      dockerfile: sandbox/Dockerfile
+    command: ["uvicorn", "cloudtxn.demo_control:app", "--host", "0.0.0.0", "--port", "8790"]
+
+  web:
+    build:
+      context: ..
+      dockerfile: sandbox/Dockerfile
+    environment:
+      CLOUDTXN_DEMO_MODE: "1"
+      CLOUDTXN_DEMO_FAST: "1"
+      CLOUDTXN_SANDBOX_ROOT: /sandbox
+      CLOUDTXN_ALLOWED_KUBE_CONTEXT: k3d-cloudtxn-sandbox-demo
+      CLOUDTXN_ALLOWED_SSM_ENDPOINT: http://localstack:4566
+      CLOUDTXN_ALLOWED_SERVICE_HOSTS: localstack
+      CLOUDTXN_FEATURE_FLAG_URL: http://demo-control:8790/payments/flags/payment-fallback
+      CLOUDTXN_PAYMENT_HEALTH_URL: http://kong:8000/lab/health
+      CLOUDTXN_DIAGNOSTICS_URL: http://kong:8000/lab/diagnostics
+      CLOUDTXN_OLLAMA_URL: http://ollama:11434
+      CLOUDTXN_OLLAMA_MODEL: qwen2.5-coder:0.5b
+      CLOUDTXN_GITHUB_REPOSITORY: alexzerg/cloudtxn
+      KUBECONFIG: /sandbox/kubeconfig
+      AWS_CONFIG_FILE: /sandbox/aws/config
+      AWS_SHARED_CREDENTIALS_FILE: /sandbox/aws/credentials
+      AWS_ACCESS_KEY_ID: cloudtxn-demo
+      AWS_SECRET_ACCESS_KEY: cloudtxn-demo
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+    volumes:
+      - ../.sandbox/kubeconfig-container:/sandbox/kubeconfig:ro
+      - ../.sandbox/aws:/sandbox/aws:ro
+      - ../.sandbox/journals:/sandbox/journals
+    networks:
+      - default
+      - k3d
+    depends_on:
+      - localstack
+      - ollama
+      - demo-control
+
+  kong:
+    image: kong:3.9.1
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_LOG_LEVEL: notice
+      KONG_DNS_RESOLVER: 127.0.0.11
+      KONG_DNS_ORDER: LAST,A,CNAME
+    volumes:
+      - ./kong.yml:/kong/declarative/kong.yml:ro
+    ports:
+      - "127.0.0.1:18000:8000"
+      - "127.0.0.1:18001:8001"
+    networks:
+      - default
+      - k3d
+    depends_on:
+      - web
+      - demo-control
+
+networks:
+  k3d:
+    external: true
+    name: k3d-cloudtxn-sandbox-demo

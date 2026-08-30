@@ -1,0 +1,21 @@
+apiVersion: cloudtxn.io/v1
+id: sandbox-integration-failure
+steps:
+  - id: scale-demo
+    operation: kubernetes.scale_deployment
+    config:
+      context: k3d-cloudtxn-sandbox-demo
+      namespace: default
+      deployment: cloudtxn-demo
+      replicas: 3
+  - id: update-parameter
+    operation: aws.ssm_put_parameter
+    config:
+      endpoint_url: http://127.0.0.1:14566
+      region: us-east-1
+      name: /cloudtxn/demo
+      value: after
+  - id: trigger-rollback
+    operation: test.fail
+    config:
+      message: planned sandbox failure

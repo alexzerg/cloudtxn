@@ -1,0 +1,7 @@
+apiVersion: cloudtxn.io/v1alpha1
+kind: PaymentIncidentChange
+spec:
+  paymentApiReplicas: 1
+  paymentProvider: primary
+  paymentFallback: false
+  paymentReconcilerReplicas: 1
