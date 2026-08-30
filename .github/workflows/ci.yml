@@ -20,6 +20,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install -e '.[dev]'
       - run: ruff check .
-      - run: mypy src
+      - run: mypy --python-version "${{ matrix.python-version }}" src
       - run: pytest -q
       - run: python -m build
