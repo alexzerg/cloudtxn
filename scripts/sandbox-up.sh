@@ -67,11 +67,15 @@ k3d image import cloudtxn-payment-lab:demo -c "$CLOUDTXN_SANDBOX_CLUSTER" >/dev/
 kubectl --kubeconfig "$KUBECONFIG" --context "$CLOUDTXN_ALLOWED_KUBE_CONTEXT" \
   apply -f demo/payment-lab.yaml >/dev/null
 kubectl --kubeconfig "$KUBECONFIG" --context "$CLOUDTXN_ALLOWED_KUBE_CONTEXT" \
-  rollout status deployment/postgres --timeout=120s >/dev/null
+  rollout status deployment/postgres --timeout=45s >/dev/null
 kubectl --kubeconfig "$KUBECONFIG" --context "$CLOUDTXN_ALLOWED_KUBE_CONTEXT" \
-  rollout status deployment/payment-api --timeout=120s >/dev/null
+  scale deployment/payment-reconciler --replicas=0 >/dev/null
 kubectl --kubeconfig "$KUBECONFIG" --context "$CLOUDTXN_ALLOWED_KUBE_CONTEXT" \
-  rollout status deployment/payment-reconciler --timeout=120s >/dev/null
+  rollout status deployment/payment-api --timeout=45s >/dev/null
+kubectl --kubeconfig "$KUBECONFIG" --context "$CLOUDTXN_ALLOWED_KUBE_CONTEXT" \
+  scale deployment/payment-reconciler --replicas=1 >/dev/null
+kubectl --kubeconfig "$KUBECONFIG" --context "$CLOUDTXN_ALLOWED_KUBE_CONTEXT" \
+  rollout status deployment/payment-reconciler --timeout=30s >/dev/null
 
 kubectl --kubeconfig "$KUBECONFIG" --context "$CLOUDTXN_ALLOWED_KUBE_CONTEXT" \
   apply -f demo/deployment.yaml >/dev/null
