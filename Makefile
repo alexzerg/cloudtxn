@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 CONFIRM ?=
 
-.PHONY: demo-preload demo-up demo-check demo-status demo-stop demo-down unit package
+.PHONY: demo-preload demo-up demo-reset demo-check demo-status demo-stop demo-down unit package
 
 demo-preload:
 	@./scripts/demo-preload.sh
@@ -9,6 +9,9 @@ demo-preload:
 demo-up:
 	@./scripts/sandbox-up.sh
 	@./scripts/demo-status.sh
+
+demo-reset:
+	@./scripts/demo-reset.sh
 
 demo-check:
 	@./scripts/web-integration.sh

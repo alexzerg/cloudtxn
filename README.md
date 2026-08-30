@@ -29,6 +29,35 @@ A PostgreSQL `AccessExclusiveLock` held by `payment-reconciler` degrades checkou
 
 No paid cloud account, production credentials, or external AI API is required.
 
+## Why CloudTxn is different
+
+Unlike preview environments, canary tools, or Terraform PR planners, CloudTxn treats an incident pull request as a reversible transaction across Kubernetes, configuration, and feature flags. It validates the customer outcome against a live failure, automatically compensates every mutation, and lets AI propose—but never execute—the next fix.
+
+- **Business outcome, not deployment status:** a technically valid change is rejected when checkout remains broken.
+- **Cross-system compensation:** Kubernetes, SSM, and feature-flag state are restored as one reverse-ordered transaction.
+- **Reversible success:** even a successful safe test restores its snapshots before explicit promotion.
+- **Constrained AI:** the model analyzes evidence, while deterministic adapters own credentials, execution, verification, and rollback.
+
+## Built with
+
+| Technology | Role in CloudTxn |
+|---|---|
+| GitHub Pull Requests and GitHub Actions | Real change proposals plus green Python 3.9/3.12 CI gates |
+| Ollama and Qwen2.5-Coder | Local, evidence-grounded incident diagnosis |
+| FastAPI and Pydantic | API surface and strict allowlisted transaction schemas |
+| Kubernetes, k3d, and OpenLens | Isolated execution environment and visible scaling/compensation |
+| PostgreSQL | Real `AccessExclusiveLock` incident and diagnostic evidence |
+| Kong | Customer-facing gateway and business-health verification point |
+| LocalStack SSM and feature flags | Independent configuration control planes |
+| Saga compensation and JSONL journals | Deterministic rollback and append-only evidence |
+| Docker Compose | Reproducible one-command local sandbox |
+| Ruff, mypy, and pytest | Local and GitHub Actions quality gates |
+
+## Demo pull requests
+
+- [PR #1: plausible engineer fix that CloudTxn rejects](https://github.com/alexzerg/cloudtxn/pull/1)
+- [PR #2: evidence-grounded AI remediation](https://github.com/alexzerg/cloudtxn/pull/2)
+
 ## Quick start
 
 Prerequisites: Docker, k3d, kubectl, AWS CLI, Python 3.9+, Node.js, and jq.
@@ -66,6 +95,7 @@ Unknown operations, repositories, resources, contexts, and irreversible actions 
 
 ```bash
 make demo-status
+make demo-reset  # restore the real degraded incident before another recording
 make demo-check
 make demo-stop
 make demo-down CONFIRM=DELETE-CLOUDTXN-SANDBOX
